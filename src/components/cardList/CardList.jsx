@@ -2,6 +2,8 @@ import React from "react";
 import styles from "./cardList.module.css";
 import Pagination from "../pagination/Pagination";
 import Card from "../card/Card";
+import { fetchposts } from "../../../lib/actions/posts.actions";
+import { Grid } from "@mui/material";
 
 // const getData = async (page, cat) => {
 //   const res = await fetch(
@@ -19,7 +21,7 @@ import Card from "../card/Card";
 // };
 
 const CardList = async ({ page, cat }) => {
-  const posts = []
+  const posts = await fetchposts();
   const count = 0
 
   const POST_PER_PAGE = 2;
@@ -31,9 +33,13 @@ const CardList = async ({ page, cat }) => {
     <div className={styles.container}>
       <h1 className={styles.title}>Recent Posts</h1>
       <div className={styles.posts}>
-        {posts?.map((item) => (
-          <Card item={item} key={item._id} />
-        ))}
+        <Grid container>
+          {posts.map((post) => (
+            <Grid key={post.id} item xs={12} sm={6} md={6}>
+              <Card post={post} key={post.id} />
+            </Grid>
+          ))}
+        </Grid>
       </div>
       <Pagination page={page} hasPrev={hasPrev} hasNext={hasNext} />
     </div>
