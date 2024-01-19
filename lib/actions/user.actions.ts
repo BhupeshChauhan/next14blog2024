@@ -1,18 +1,25 @@
 "use server";
 import CryptoJS from "crypto-js";
 
-import { FilterQuery, SortOrder } from "mongoose";
+import { SortOrder } from "mongoose";
 
 import { connectToDB } from "../mongoose";
 import User from "../models/user.model";
-import { NextResponse } from "next/server";
-import { uniqueId } from "lodash";
+import { validatePayload } from "../utils";
+import Roles from "../models/roles.model";
 
-export async function createUser(req: any, res: any) {
+export async function createUser(payload: any) {
   try {
     connectToDB();
-    const { name, email, password, role } = await req.body;
-
+    const requiredFields = ["name", "email", "password", "role"];
+    const validate = validatePayload(payload, requiredFields);
+    if (!validate?.payloadIsCurrect) {
+      return {
+        status: 400,
+        message: `Missing required fields: ${validate.missingFields}`,
+      };
+    }
+    const { name, email, password, role } = payload;
     const encryptedPassword = CryptoJS.AES.encrypt(
       password,
       process.env.SECRETKEY || "",
@@ -21,11 +28,10 @@ export async function createUser(req: any, res: any) {
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "Email already in use", status: 400 });
+      return { status: 400, message: "Email already in use" };
     }
 
+    const RolesData = await Roles.findOne({ name: role });
     const UserData = await User.find();
 
     const newUser = new User({
@@ -33,63 +39,142 @@ export async function createUser(req: any, res: any) {
       name,
       email,
       password: encryptedPassword,
-      role,
+      roleId: RolesData.id,
+      client: false,
     });
 
     await newUser.save();
-    return res.status(200).json({ message: "Success ADDED", status: 200 });
+    return { status: 200, message: "Added Succesfully" };
   } catch (error) {
     console.error("Error:", error);
 
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", status: 500 });
+    return { status: 500, message: "Internal Server Error" };
   }
 }
 
-export async function fetchUser(req: any, res: any) {
+const getRolesData = async (UserData: any) => {
+  let newUserData: any = [];
+  for (const item of UserData) {
+    const RolesData = await Roles.findOne({ id: Number(item?.roleId) });
+    newUserData = [...newUserData, { ...item, role: RolesData?.name }];
+  }
+  return newUserData;
+};
+
+export async function fetchUser() {
   try {
     connectToDB();
-    const UserData = await User.find();
+    const UserData: any = await User.find();
 
-    return res
-      .status(200)
-      .json({ data: UserData, message: "SuccessFully Fetched", status: 200 });
+    return JSON.parse(JSON.stringify(UserData));
   } catch (error: any) {
     console.error("Error:", error);
 
-    return res.status(500).json({ message: "Internal Server Error" });
+    // throw new Error("Failed to fetch")
   }
 }
 
-export async function fetchUserByEmail(req: any, res: any) {
-  const { email } = await req.body;
+export async function fetchAdminUser() {
+  try {
+    connectToDB();
+    const UserData: any = await User.find({ client: false });
+    let newUserData: any = await getRolesData(
+      JSON.parse(JSON.stringify(UserData)),
+    );
+
+    return JSON.parse(JSON.stringify(newUserData));
+  } catch (error: any) {
+    console.error("Error:", error);
+
+    // throw new Error("Failed to fetch")
+  }
+}
+
+export async function fetchAdminUserById(id: any) {
+  try {
+    connectToDB();
+    const UserData: any = await User.find({ id: Number(id) });
+    const RolesData = await Roles.findOne({
+      id: Number(UserData?.[0]?.roleId),
+    });
+
+    const decryptPassword = CryptoJS.AES.decrypt(
+      UserData[0].password,
+      process.env.SECRETKEY || "",
+    ).toString(CryptoJS.enc.Utf8);
+
+    let newUserData: any = {
+      ...JSON.parse(JSON.stringify(UserData))[0],
+      role: JSON.parse(JSON.stringify(RolesData)).name,
+      password: decryptPassword,
+    };
+
+    return JSON.parse(JSON.stringify(newUserData));
+  } catch (error: any) {
+    console.error("Error:", error);
+
+    // throw new Error("Failed to fetch")
+  }
+}
+
+export async function fetchClientUser() {
+  try {
+    connectToDB();
+    const UserData: any = await User.find({ client: true });
+
+    return JSON.parse(JSON.stringify(UserData));
+  } catch (error: any) {
+    console.error("Error:", error);
+
+    // throw new Error("Failed to fetch")
+  }
+}
+
+export async function fetchUserByEmail(email: any) {
   try {
     connectToDB();
     const UserData = await User.findOne({ email });
 
-    return res.status(200).json({ data: UserData, message: "User Exists" });
+    return { status: 200, message: "Added Succesfully", data: UserData };
   } catch (error: any) {
     console.error("Error:", error);
 
-    return res.status(500).json({ message: "Internal Server Error" });
+    return { status: 500, message: "Internal Server Error" };
   }
 }
 
-export async function updateUser(req: any, res: any) {
+export async function updateUser(payload: any) {
   try {
     connectToDB();
-    const { name, email, password } = await req.body;
+    const requiredFields = ["name", "email", "password", "role"];
+    const validate = validatePayload(payload, requiredFields);
+    if (!validate?.payloadIsCurrect) {
+      return {
+        status: 400,
+        message: `Missing required fields: ${validate.missingFields}`,
+      };
+    }
+    const { id, name, email, password, role } = await payload;
+    const encryptedPassword = CryptoJS.AES.encrypt(
+      password,
+      process.env.SECRETKEY || "",
+    ).toString();
+    const RolesData = await Roles.findOne({ name: role });
+    const filter = { id }; // Specify the criteria for the document to update
+    const update = {
+      $set: {
+        name: name,
+        email: email,
+        password: encryptedPassword,
+        role: RolesData?.name,
+      },
+    }; // Define the update operation
 
-    console.log("req", req.body);
-    console.log("name", name);
-    console.log("email", email);
-    console.log("password", password);
-
-    return res.status(200).json({ message: "Success ADDED" });
+    await User.updateOne(filter, update);
+    return { status: 200, message: "Updated Succesfully" };
   } catch (error) {
     console.error("Error:", error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return { status: 500, message: "Internal Server Error" };
   }
 }
 
