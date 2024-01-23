@@ -25,6 +25,7 @@
     "swiper": "^11.0.5"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.1",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20",
     "@types/react": "^18",

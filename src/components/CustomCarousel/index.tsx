@@ -39,11 +39,17 @@ const CustomCarousel = ({ itemArray }: any) => {
               >
                 <h1 className={styles.title}>{item.title}</h1>
                 <div className={styles.textContainer}>
-                  <div className={styles.textAreaImage}></div>
+                  <div>
+                    <img
+                      src={item.featuredImage}
+                      alt=""
+                      className={styles.textAreaImage}
+                    />
+                  </div>
                   <div className="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white">
                     <img
                       className="mr-4 w-10 h-10 rounded-full"
-                      src="https://flowbite.com/docs/images/people/profile-picture-2.jpg"
+                      src={item?.author?.profilePicture}
                       alt="Jese Leos"
                     />
                     <div>
@@ -52,10 +58,10 @@ const CustomCarousel = ({ itemArray }: any) => {
                         rel="author"
                         className="text-lg font-bold text-gray-900 dark:text-white"
                       >
-                        Jese Leos
+                        {item?.author?.name}
                       </a>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Graphic Designer, educator & CEO Flowbite
+                        {item?.author?.bio}
                       </p>
                       {/* <p className="text-sm text-gray-500 dark:text-gray-400"><time>Feb. 8, 2022</time></p> */}
                     </div>
@@ -70,7 +76,7 @@ const CustomCarousel = ({ itemArray }: any) => {
                         Contact Us
                       </Button>
                     </Link>
-                    <Link href={`/post/${item.title}`}>
+                    <Link href={`/post/${item.slug}`}>
                       <Button variant="outlined">Read More</Button>
                     </Link>
                   </div>

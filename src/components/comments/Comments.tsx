@@ -3,30 +3,18 @@
 import Link from "next/link";
 import styles from "./comments.module.css";
 import Image from "next/image";
-import useSWR from "swr";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 
-const fetcher = async (url) => {
-  const res = await fetch(url);
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    const error = new Error(data.message);
-    throw error;
-  }
-
-  return data;
-};
-
-const Comments = ({ postSlug }) => {
+const Comments = ({ postSlug }: any) => {
   const { status } = useSession();
 
-  const { data, mutate, isLoading } = useSWR(
-    `http://localhost:3000/api/comments?postSlug=${postSlug}`,
-    fetcher
-  );
+  // const { data, mutate, isLoading } = useSWR(
+  //   `http://localhost:3000/api/comments?postSlug=${postSlug}`,
+  //   fetcher
+  // );
+
+  const data = []
 
   const [desc, setDesc] = useState("");
 
@@ -35,7 +23,7 @@ const Comments = ({ postSlug }) => {
       method: "POST",
       body: JSON.stringify({ desc, postSlug }),
     });
-    mutate();
+    // mutate();
   };
 
   return (
@@ -56,9 +44,9 @@ const Comments = ({ postSlug }) => {
         <Link href="/login">Login to write a comment</Link>
       )}
       <div className={styles.comments}>
-        {isLoading
+        {true
           ? "loading"
-          : data?.map((item) => (
+          : data?.map((item: any) => (
               <div className={styles.comment} key={item._id}>
                 <div className={styles.user}>
                   {item?.user?.image && (

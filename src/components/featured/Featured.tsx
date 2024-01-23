@@ -1,7 +1,9 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./featured.module.css";
 import CustomCarousel from "../CustomCarousel";
+import { fetchPostsFeaturedHome } from "../../../lib/actions/posts.actions";
+import { usePathname } from "next/navigation";
 
 const FeaturedArrays = [
   {
@@ -18,13 +20,25 @@ const FeaturedArrays = [
   },
 ];
 const Featured = () => {
+  const [Posts, setPosts] = useState([]);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    async function ApiCall() {
+      await fetchPostsFeaturedHome().then((res) => {
+        console.log(res, 'results');
+        setPosts(res);
+      });
+    }
+    ApiCall();
+  }, [pathname]);
   return (
     <div className={styles.container}>
       <div className={styles.imageBackground}></div>
       <div className={styles.imageBackgroundBlur}></div>
       <div className={styles.FeaturedTextContainer}>
         <div className={styles.post}>
-          <CustomCarousel itemArray={FeaturedArrays} />
+          <CustomCarousel itemArray={Posts} />
         </div>
       </div>
       <div className={styles.FeaturedImgContainer} />

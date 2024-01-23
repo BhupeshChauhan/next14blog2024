@@ -16,33 +16,32 @@ const Card = ({ key, post }: any) => {
         </a>
         <div className="p-5">
           <div className="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white">
-            <img
-              className="mr-4 w-8 h-8 rounded-full"
-              src="https://flowbite.com/docs/images/people/profile-picture-2.jpg"
-              alt="Jese Leos"
-            />
+          <img
+                      className="mr-4 w-10 h-10 rounded-full"
+                      src={post?.author?.profilePicture}
+                      alt="Jese Leos"
+                    />
             <div>
               <a
                 href="#"
                 rel="author"
                 className="text-md font-bold text-gray-900 dark:text-white"
               >
-                Jese Leos
+                {post?.author?.name}
               </a>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Graphic Designer
+              {post?.author?.bio}
               </p>
               {/* <p className="text-sm text-gray-500 dark:text-gray-400"><time>Feb. 8, 2022</time></p> */}
             </div>
           </div>
           <a href="#">
             <h5 className="mt-2 mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-              Noteworthy technology acquisitions 2021
+            {post?.title}
             </h5>
           </a>
           <p className="text-sm mb-3 font-normal text-gray-700 dark:text-gray-400">
-            Here are the biggest enterprise technology acquisitions of 2021 so
-            far, in reverse chronological order.
+          {post?.description}
           </p>
           <Button variant="outlined">Read more</Button>
         </div>

@@ -11,6 +11,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    profilePicture: {
+      type: String,
+      required: true,
+    },
     roleId: {
       type: Number,
     },
@@ -19,8 +23,8 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     password: String,
-    image: String,
     bio: String,
+    featured: Object,
     isInActive: Boolean,
   },
   { timestamps: true },
