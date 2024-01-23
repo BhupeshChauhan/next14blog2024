@@ -41,7 +41,7 @@ const CardList = async ({ page, cat }) => {
           ))}
         </Grid>
       </div>
-      <Pagination page={page} hasPrev={hasPrev} hasNext={hasNext} />
+      {/* <Pagination page={page} hasPrev={hasPrev} hasNext={hasNext} /> */}
     </div>
   );
 };
